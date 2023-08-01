@@ -1,0 +1,22 @@
+[package]
+name = "jwctl"
+version = "0.1.0"
+edition = "2021"
+description = "A CLI for interacting with the JumpWire proxy engine."
+homepage = "https://jumpwire.io/"
+repository = "https://github.com/jumpwire-ai/jwctl/"
+license-file = "LICENSE"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.72"
+clap = { version = "4.3.19", features = ["derive"] }
+config = "0.13.3"
+home = "0.5.5"
+log = "0.4.19"
+reqwest = { version = "0.11.18", features = ["blocking", "json"] }
+serde = { version = "1.0.179", features = ["serde_derive"] }
+serde_json = "1.0.104"
+simplelog = { version = "0.12.1", features = ["paris"] }
+url = { version = "2.4.0", features = ["serde"] }
