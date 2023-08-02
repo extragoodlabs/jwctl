@@ -45,14 +45,22 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - target: x86_64-pc-windows-gnu
-            archive: zip
-          - target: x86_64-unknown-linux-musl
-            archive: tar.gz
+          # 64-bit macOS
           - target: x86_64-apple-darwin
             archive: zip
-          - target: wasm32-wasi
-            archive: zip tar.gz
+          # 64-bit MinGW (Windows 7+)
+          - target: x86_64-pc-windows-gnu
+            archive: zip
+          # 64-bit Linux
+          - target: x86_64-unknown-linux-gnu
+            archive: tar.gz
+
+          # ARM64 Linux
+          - target: aarch64-unknown-linux-gnu
+            archive: tar.gz
+          # ARM64 macOS
+          - target: aarch64-apple-darwin
+            archive: tar.gz
     steps:
       - uses: actions/checkout@master
       - name: Compile and release
