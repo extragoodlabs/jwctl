@@ -7,7 +7,12 @@ homepage = "https://jumpwire.io/"
 repository = "https://github.com/jumpwire-ai/jwctl/"
 license-file = "LICENSE"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[profile.release]
+opt-level = 'z'
+lto = true
+codegen-units = 1
+panic = 'abort'
+strip = true
 
 [dependencies]
 anyhow = "1.0.72"
