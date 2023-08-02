@@ -56,13 +56,14 @@ jobs:
           # ARM64 macOS
           - aarch64-apple-darwin
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@3
       - name: Install toolchain
         run: |
           rustup set profile minimal
           rustup target add ${{ matrix.target }}
+          cargo install cross --git https://github.com/cross-rs/cross
       - name: Compile release
-        run: cargo build --verbose --release --target ${{ matrix.target }}
+        run: cross build --verbose --release --target ${{ matrix.target }}
       - name: Create archive
         run: tar caf jwctl-${{ matrix.target }}.tar.gz target/${{ matrix.target }}/release/jwctl
       - name: Upload binary
