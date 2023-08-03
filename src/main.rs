@@ -26,8 +26,12 @@ pub struct Args {
     verbose: bool,
 
     /// Enable timestamps in log lines
-    #[arg(short, long)]
+    #[arg(long)]
     timestamps: bool,
+
+    /// Token to use for authenticating to the JumpWire API
+    #[arg(short, long)]
+    token: Option<String>,
 }
 
 #[derive(Clone, Debug, Subcommand)]
@@ -40,6 +44,9 @@ enum Commands {
 
     /// Run a simple ping against the proxy server
     Ping,
+
+    /// Store the authenticate token for future calls
+    Authenticate,
 }
 
 impl config_rs::Source for Args {
@@ -54,6 +61,14 @@ impl config_rs::Source for Args {
             Some(url) => {
                 let value = config_rs::ValueKind::String(url.to_string());
                 m.insert("url".to_string(), value.into());
+            }
+            None => (),
+        };
+
+        match &self.token {
+            Some(token) => {
+                let value = config_rs::ValueKind::String(token.to_string());
+                m.insert("token".to_string(), value.into());
             }
             None => (),
         };
@@ -106,6 +121,10 @@ fn main() -> Result<()> {
         Commands::Ping => {
             let resp = command::ping(config)?;
             info!("Ping response: {:?}", resp);
+        }
+        Commands::Authenticate => {
+            command::authenticate(config)?;
+            info!("Authentication token stored!");
         }
     };
 
