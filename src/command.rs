@@ -25,6 +25,18 @@ pub fn authenticate(config: Config) -> Result<()> {
     crate::config::save_token(token)
 }
 
+pub fn config_get(config: Config) -> Result<()> {
+    info!("Current configuration:\n{:#?}", config);
+    Ok(())
+}
+
+pub fn whoami(config: Config) -> Result<Value, reqwest::Error> {
+    let mut url = config.url;
+    url.set_path("/_jumpwire/token");
+    let request = reqwest::blocking::Client::new().get(url);
+    maybe_add_auth(request, config.token).send()?.json()
+}
+
 fn maybe_add_auth(request: RequestBuilder, token: Option<String>) -> RequestBuilder {
     match token {
         Some(token) => request.bearer_auth(token),

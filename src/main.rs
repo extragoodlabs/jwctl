@@ -36,8 +36,8 @@ pub struct Args {
 
 #[derive(Clone, Debug, Subcommand)]
 enum Commands {
-    /// Print the current CLI config
-    Config,
+    /// Check the current CLI configuration
+    Config(ConfigArgs),
 
     /// Check the status of the proxy server
     Status,
@@ -47,6 +47,21 @@ enum Commands {
 
     /// Store the authenticate token for future calls
     Authenticate,
+}
+
+#[derive(Clone, Debug, clap::Args)]
+struct ConfigArgs {
+    #[command(subcommand)]
+    command: ConfigCommands,
+}
+
+#[derive(Clone, Debug, Subcommand)]
+enum ConfigCommands {
+    /// Display the current configuration
+    Get,
+
+    /// Check permissions on the configured authentication
+    Whoami,
 }
 
 impl config_rs::Source for Args {
@@ -113,7 +128,13 @@ fn main() -> Result<()> {
     let config = config::load_config(args.clone())?;
 
     match &args.command {
-        Commands::Config => info!("Current configuration:\n{:#?}", config),
+        Commands::Config(config_args) => match config_args.command {
+            ConfigCommands::Get => command::config_get(config)?,
+            ConfigCommands::Whoami => {
+                let resp = command::whoami(config)?;
+                info!("whoami:\n{}", to_string_pretty(&resp)?);
+            }
+        },
         Commands::Status => {
             let resp = command::status(config)?;
             info!("Remote status:\n{}", to_string_pretty(&resp)?);
