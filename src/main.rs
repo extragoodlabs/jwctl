@@ -37,7 +37,10 @@ pub struct Args {
 #[derive(Clone, Debug, Subcommand)]
 enum Commands {
     /// Check the current CLI configuration
-    Config(ConfigArgs),
+    Config {
+        #[command(subcommand)]
+        command: ConfigCommands,
+    },
 
     /// Check the status of the proxy server
     Status,
@@ -45,22 +48,25 @@ enum Commands {
     /// Run a simple ping against the proxy server
     Ping,
 
-    /// Store the authenticate token for future calls
-    Authenticate,
-}
-
-#[derive(Clone, Debug, clap::Args)]
-struct ConfigArgs {
-    #[command(subcommand)]
-    command: ConfigCommands,
+    /// Interact with bearer tokens used for authentication
+    Token {
+        #[command(subcommand)]
+        command: TokenCommands,
+    },
 }
 
 #[derive(Clone, Debug, Subcommand)]
 enum ConfigCommands {
     /// Display the current configuration
     Get,
+}
 
-    /// Check permissions on the configured authentication
+#[derive(Clone, Debug, Subcommand)]
+enum TokenCommands {
+    /// Store the authenticate token for future calls
+    Set,
+
+    /// Check permissions on the configured token
     Whoami,
 }
 
@@ -128,12 +134,8 @@ fn main() -> Result<()> {
     let config = config::load_config(args.clone())?;
 
     match &args.command {
-        Commands::Config(config_args) => match config_args.command {
+        Commands::Config { command } => match command {
             ConfigCommands::Get => command::config_get(config)?,
-            ConfigCommands::Whoami => {
-                let resp = command::whoami(config)?;
-                info!("whoami:\n{}", to_string_pretty(&resp)?);
-            }
         },
         Commands::Status => {
             let resp = command::status(config)?;
@@ -143,10 +145,16 @@ fn main() -> Result<()> {
             let resp = command::ping(config)?;
             info!("Ping response: {:?}", resp);
         }
-        Commands::Authenticate => {
-            command::authenticate(config)?;
-            info!("Authentication token stored!");
-        }
+        Commands::Token { command } => match command {
+            TokenCommands::Set => {
+                command::authenticate(config)?;
+                info!("Authentication token stored!");
+            }
+            TokenCommands::Whoami => {
+                let resp = command::whoami(config)?;
+                info!("whoami:\n{}", to_string_pretty(&resp)?);
+            }
+        },
     };
 
     Ok(())

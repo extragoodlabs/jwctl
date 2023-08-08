@@ -25,11 +25,13 @@ pub fn authenticate(config: Config) -> Result<()> {
     crate::config::save_token(token)
 }
 
+/// Print out the configuration
 pub fn config_get(config: Config) -> Result<()> {
     info!("Current configuration:\n{:#?}", config);
     Ok(())
 }
 
+/// Check configured token permissions
 pub fn whoami(config: Config) -> Result<Value, reqwest::Error> {
     let mut url = config.url;
     url.set_path("/_jumpwire/token");

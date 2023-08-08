@@ -29,10 +29,10 @@ jwctl -t mysecrettoken <COMMAND>
 JW_TOKEN=mysecrettoken jwctl <COMMAND>
 ```
 
-The token can also be persisted to disk for future use. `jwctl` will attempt to load a token from `~/.config/jwctl/.token`. The token file can be created using the authenticate command:
+The token can also be persisted to disk for future use. `jwctl` will attempt to load a token from `~/.config/jwctl/.token`. The token file can be created using the token command:
 
 ```bash
-JW_TOKEN=mysecrettoken jwctl authenticate
+JW_TOKEN=mysecrettoken jwctl token set
 jwctl <COMMAND>
 ```
 
@@ -61,15 +61,15 @@ All configuration options can be set using environment variables. Each variable 
 
 Print a help message listing all commands. Can be passed a command to print the help message for a specific command.
 
-### `authenticate`
-
-Store an authentication token to a persisted configuration file.
-
 ### `config get`
 
 Print the final configuration after merging together all configuration sources.
 
-### `config whoami`
+### `token set`
+
+Store an authentication token to a persisted configuration file.
+
+### `token whoami`
 
 Check the token against the remote server. If it is valid, the associated permissions will be printed.
 
