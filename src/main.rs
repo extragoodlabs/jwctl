@@ -68,6 +68,17 @@ enum TokenCommands {
 
     /// Check permissions on the configured token
     Whoami,
+
+    /// Generate a new authentication token
+    ///
+    /// Example: `jwctl token generate get:token get:status`
+    #[command(arg_required_else_help = true)]
+    Generate {
+        /// Permissions are pairs of method:action specifying what the token is allowed to do.
+        ///
+        /// For example, retrieving the server's health information requires the permission `get:status`
+        permissions: Vec<String>,
+    },
 }
 
 impl config_rs::Source for Args {
@@ -153,6 +164,10 @@ fn main() -> Result<()> {
             TokenCommands::Whoami => {
                 let resp = command::whoami(config)?;
                 info!("whoami:\n{}", to_string_pretty(&resp)?);
+            }
+            TokenCommands::Generate { permissions } => {
+                let resp = command::generate_token(config, permissions)?;
+                info!("Token generated:\n{}", to_string_pretty(&resp)?);
             }
         },
     };

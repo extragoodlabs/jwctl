@@ -1,5 +1,8 @@
+use std::collections::HashMap;
+
 use crate::config::Config;
 use anyhow::{Error, Result};
+use itertools::Itertools;
 use reqwest::blocking::RequestBuilder;
 use serde_json::Value;
 
@@ -37,6 +40,29 @@ pub fn whoami(config: Config) -> Result<Value, reqwest::Error> {
     url.set_path("/_jumpwire/token");
     let request = reqwest::blocking::Client::new().get(url);
     maybe_add_auth(request, config.token).send()?.json()
+}
+
+/// Generate a new token with specific permissions
+pub fn generate_token(config: Config, permissions: &[String]) -> Result<Value> {
+    let mut url = config.url;
+    url.set_path("/_jumpwire/token");
+
+    let permissions: HashMap<&str, Vec<&str>> = permissions
+        .iter()
+        .map(|p| {
+            let mut parts = p.splitn(2, ':');
+            let method = parts.next().ok_or(Error::msg("Invalid permission"))?;
+            let action = parts.next().ok_or(Error::msg("Invalid permission"))?;
+            Ok::<(&str, &str), Error>((method, action))
+        })
+        .process_results(|iter| iter.into_group_map())?;
+
+    let mut body = HashMap::new();
+    body.insert("permissions", permissions);
+
+    let request = reqwest::blocking::Client::new().post(url).json(&body);
+    let result = maybe_add_auth(request, config.token).send()?.json()?;
+    Ok(result)
 }
 
 fn maybe_add_auth(request: RequestBuilder, token: Option<String>) -> RequestBuilder {

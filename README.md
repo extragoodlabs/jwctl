@@ -73,6 +73,16 @@ Store an authentication token to a persisted configuration file.
 
 Check the token against the remote server. If it is valid, the associated permissions will be printed.
 
+### `token generate`
+
+Generate a new token. Permissions must be passed in as pairs of method-action.
+
+#### Example:
+
+```bash
+jwctl token generate get:token get:status
+```
+
 ### `status`
 
 Retrieve the status of the remote server and print it.
