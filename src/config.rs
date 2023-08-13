@@ -3,7 +3,10 @@ use std::path::PathBuf;
 
 use crate::Args;
 use anyhow::{Error, Result};
+// use re-exported version of `CookieStore` for crate compatibility
+use reqwest_cookie_store::{CookieStore, CookieStoreMutex};
 use serde::Deserialize;
+use std::sync::Arc;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
@@ -61,5 +64,38 @@ pub fn save_token(token: String) -> Result<()> {
     path.push(TOKEN_FILE);
     info!("Saving token to {:?}", path);
     fs::write(path, token)?;
+    Ok(())
+}
+
+/// Load an existing set of cookies, serialized as json
+pub fn get_cookie_store() -> Result<Arc<CookieStoreMutex>> {
+    let mut path = config_dir()?;
+    path.push("cookies.json");
+    debug!("Loading cookies from {:?}", path);
+
+    let store = match fs::File::open(path).map(std::io::BufReader::new) {
+        Ok(file) => CookieStore::load_json_all(file)
+            .map_err(|err| Error::msg(format!("Failed to load cookie file: {err}")))?,
+        _ => CookieStore::new(None),
+    };
+    let store = CookieStoreMutex::new(store);
+    let store = Arc::new(store);
+    Ok(store)
+}
+
+/// Write reqwest cookies back to disk
+pub fn save_cookies(cookie_store: Arc<CookieStoreMutex>) -> Result<()> {
+    let mut path = config_dir()?;
+    path.push("cookies.json");
+    debug!("Saving cookies to {:?}", path);
+
+    let mut writer = std::fs::File::create(path).map(std::io::BufWriter::new)?;
+    let store = cookie_store
+        .lock()
+        .map_err(|_| Error::msg("Could not lock the cookie store to save cookies"))?;
+
+    store
+        .save_incl_expired_and_nonpersistent_json(&mut writer)
+        .map_err(|err| Error::msg(format!("Failed to write cookies to disk: {err}")))?;
     Ok(())
 }

@@ -90,3 +90,11 @@ Retrieve the status of the remote server and print it.
 ### `ping`
 
 Run a ping command to the remote server and print the response.
+
+### `auth list`
+
+List all SSO identity providers configured on the JumpWire proxy server.
+
+### `auth login`
+
+Start a login flow with an SSO provider.

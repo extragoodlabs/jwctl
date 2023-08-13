@@ -53,6 +53,12 @@ enum Commands {
         #[command(subcommand)]
         command: TokenCommands,
     },
+
+    /// Login or check authentication using a configured SSO provider
+    Auth {
+        #[command(subcommand)]
+        command: AuthCommands,
+    },
 }
 
 #[derive(Clone, Debug, Subcommand)]
@@ -79,6 +85,22 @@ enum TokenCommands {
         /// For example, retrieving the server's health information requires the permission `get:status`
         permissions: Vec<String>,
     },
+}
+
+#[derive(Clone, Debug, Subcommand)]
+enum AuthCommands {
+    /// Login with a specified SSO provider
+    #[command(arg_required_else_help = true)]
+    Login {
+        /// The SSO identity provider
+        provider: String,
+    },
+
+    /// List configured SSO providers
+    List,
+
+    /// Check the currently logged in user
+    Whoami,
 }
 
 impl config_rs::Source for Args {
@@ -162,12 +184,32 @@ fn main() -> Result<()> {
                 info!("Authentication token stored!");
             }
             TokenCommands::Whoami => {
-                let resp = command::whoami(config)?;
+                let resp = command::token_whoami(config)?;
                 info!("whoami:\n{}", to_string_pretty(&resp)?);
             }
             TokenCommands::Generate { permissions } => {
                 let resp = command::generate_token(config, permissions)?;
                 info!("Token generated:\n{}", to_string_pretty(&resp)?);
+            }
+        },
+        Commands::Auth { command } => match command {
+            AuthCommands::List => {
+                let resp = command::auth_list(config)?;
+                info!(
+                    "Configured SSO identity providers:\n{}",
+                    to_string_pretty(&resp)?
+                );
+            }
+            AuthCommands::Login { provider } => {
+                let resp = command::auth_login(config, provider)?;
+                match resp.get("error") {
+                    Some(err) => error!("{}", to_string_pretty(&err)?),
+                    _ => info!("Authenticated!"),
+                };
+            }
+            AuthCommands::Whoami => {
+                let resp = command::sso_whoami(config)?;
+                info!("whoami:\n{}", to_string_pretty(&resp)?);
             }
         },
     };
