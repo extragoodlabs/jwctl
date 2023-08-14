@@ -1,12 +1,13 @@
 mod command;
 mod config;
+mod terminal;
 
 #[macro_use]
 extern crate log;
 extern crate config as config_rs;
 
 use anyhow::Result;
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use log::{LevelFilter, SetLoggerError};
 use serde_json::to_string_pretty;
 use simplelog::TermLogger;
@@ -59,6 +60,12 @@ enum Commands {
         #[command(subcommand)]
         command: AuthCommands,
     },
+
+    /// Commands to interact with a proxied database server
+    Db {
+        #[command(subcommand)]
+        command: DbCommands,
+    },
 }
 
 #[derive(Clone, Debug, Subcommand)]
@@ -101,6 +108,36 @@ enum AuthCommands {
 
     /// Check the currently logged in user
     Whoami,
+}
+
+#[derive(Clone, Debug, Subcommand)]
+enum DbCommands {
+    /// List all databases of the given type
+    #[command(arg_required_else_help = true)]
+    List {
+        /// The type of database
+        #[arg(value_enum)]
+        db_type: DatabaseType,
+    },
+
+    /// Approve an authentication request to a database
+    #[command(arg_required_else_help = true)]
+    Login {
+        /// The token generated for the DB login
+        token: String,
+    },
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, ValueEnum)]
+enum DatabaseType {
+    Postgresql,
+    Mysql,
+}
+
+impl std::fmt::Display for DatabaseType {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        std::fmt::Debug::fmt(self, f)
+    }
 }
 
 impl config_rs::Source for Args {
@@ -210,6 +247,34 @@ fn main() -> Result<()> {
             AuthCommands::Whoami => {
                 let resp = command::sso_whoami(config)?;
                 info!("whoami:\n{}", to_string_pretty(&resp)?);
+            }
+        },
+        Commands::Db { command } => match command {
+            DbCommands::List { db_type } => {
+                let dbs = command::list_dbs(config, db_type.to_string())?;
+                println!("{:36} Name", "ID");
+                dbs.iter()
+                    .for_each(|(id, name)| println!("{:} {:}", id, name));
+            }
+            DbCommands::Login { token } => {
+                let dbs = command::check_db_token(&config, token)?;
+                let items: Vec<(&String, &String)> = dbs.iter().collect();
+                if items.is_empty() {
+                    error!("No matching databases!");
+                    return Ok(());
+                }
+
+                info!("Choose a database to connect to:");
+
+                // prepare an interactive terminal to let the user choose
+                // which DB to authenticate to
+                let mut term = terminal::setup_terminal()?;
+                let (id, name) = terminal::run_list_selection(&mut term, items)?;
+                terminal::restore_terminal(&mut term)?;
+
+                debug!("Authenticating to database {:}", id);
+                command::approve_db_authentication(&config, token, id)?;
+                info!("Authentication request to {:} is approved!", name);
             }
         },
     };

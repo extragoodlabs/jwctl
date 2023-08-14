@@ -127,6 +127,59 @@ pub fn sso_whoami(config: Config) -> Result<Value> {
     Ok(resp)
 }
 
+/// List all known databses of the given type
+pub fn list_dbs(config: Config, db_type: String) -> Result<HashMap<String, String>> {
+    let mut url = config.url;
+    url.set_path(format!("/_jumpwire/manifests/{db_type}").as_str());
+    let cookie_store = get_cookie_store()?;
+
+    let request = client(&cookie_store)?.get(url);
+    let resp: HashMap<String, String> = maybe_add_auth(request, config.token).send()?.json()?;
+
+    match resp.get("error") {
+        None => Ok(resp),
+        Some(err) => Err(Error::msg(err.to_string())),
+    }
+}
+
+/// Check that a DB access token is valid, returning all possible
+/// databases that it can be authenticate to.
+pub fn check_db_token(config: &Config, token: &String) -> Result<HashMap<String, String>> {
+    let mut url = config.url.clone();
+    url.set_path(format!("/_jumpwire/auth/{token}").as_str());
+    let cookie_store = get_cookie_store()?;
+    let request = client(&cookie_store)?.get(url);
+    let resp: HashMap<String, String> = maybe_add_auth(request, config.token.clone())
+        .send()?
+        .json()?;
+
+    match resp.get("error") {
+        None => Ok(resp),
+        Some(err) => Err(Error::msg(err.to_string())),
+    }
+}
+
+/// Approve a token for a DB authentication request, associating it with the currently
+/// logged in user.
+pub fn approve_db_authentication(config: &Config, token: &String, db_id: &String) -> Result<()> {
+    let mut url = config.url.clone();
+    url.set_path(format!("/_jumpwire/auth/{token}").as_str());
+    let cookie_store = get_cookie_store()?;
+
+    let mut body = HashMap::new();
+    body.insert("manifest_id", db_id);
+
+    let request = client(&cookie_store)?.put(url).json(&body);
+    let resp: HashMap<String, String> = maybe_add_auth(request, config.token.clone())
+        .send()?
+        .json()?;
+
+    match resp.get("error") {
+        None => Ok(()),
+        Some(err) => Err(Error::msg(err.to_string())),
+    }
+}
+
 fn read_code() -> Result<String> {
     let mut guess = String::new();
 

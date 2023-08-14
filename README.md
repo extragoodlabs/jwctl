@@ -98,3 +98,13 @@ List all SSO identity providers configured on the JumpWire proxy server.
 ### `auth login`
 
 Start a login flow with an SSO provider.
+
+### `db list <type>`
+
+List all databases of a given type. Currently supported types are `postgresql` and `mysql`.
+
+### `db login <token>`
+
+Approve an authentication attempt to a proxied database. The token is generated automatically when connecting a database client to the JumpWire enginer without explicitly setting a password.
+
+If the passed token is valid, jwctl will display a prompt to select which upstream database the proxy should connect to.
