@@ -102,16 +102,7 @@ pub fn run_list_selection<'a, B: Backend>(
                 if key.kind == KeyEventKind::Press {
                     match key.code {
                         KeyCode::Char('q') => {
-                            let i = list
-                                .state
-                                .selected()
-                                .ok_or(Error::msg("Nothing selected"))?;
-                            let selected = list
-                                .items
-                                .get(i)
-                                .ok_or(Error::msg("Invalid selection"))?
-                                .to_owned();
-                            return Ok(selected);
+                            return Err(Error::msg("Nothing selected"));
                         }
                         KeyCode::Enter => {
                             let i = list
