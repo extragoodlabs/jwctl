@@ -4,7 +4,7 @@ version = "0.2.1"
 edition = "2021"
 description = "A CLI for interacting with the JumpWire proxy engine."
 homepage = "https://jumpwire.io/"
-repository = "https://github.com/jumpwire-ai/jwctl/"
+repository = "https://github.com/extragoodlabs/jwctl/"
 license-file = "LICENSE"
 
 [profile.release]

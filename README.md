@@ -2,13 +2,13 @@
 
 [![jumpwire logo](./images/jumpwire-logo.png)](https://jumpwire.io)
 
-![release workflow](https://github.com/jumpwire-ai/jwctl/actions/workflows/shipit.yaml/badge.svg) [![release version](https://img.shields.io/github/v/release/jumpwire-ai/jwctl?style=flat&label=version)](https://github.com/jumpwire-ai/jwctl/releases/latest)
+![release workflow](https://github.com/extragoodlabs/jwctl/actions/workflows/shipit.yaml/badge.svg) [![release version](https://img.shields.io/github/v/release/extragoodlabs/jwctl?style=flat&label=version)](https://github.com/extragoodlabs/jwctl/releases/latest)
 
 This repo contains the CLI for interacting with a [JumpWire](https://jumpwire.io) proxy server.
 
 ## Installation
 
-[Download the release](https://github.com/jumpwire-ai/jwctl/releases/latest) for your operating system and extract it to a directory in your path. For example:
+[Download the release](https://github.com/extragoodlabs/jwctl/releases/latest) for your operating system and extract it to a directory in your path. For example:
 ```bash
 tar xzf jwctl-aarch64-apple-darwin.tar.gz
 mv ./jwctl /usr/local/bin
