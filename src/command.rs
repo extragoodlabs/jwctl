@@ -10,7 +10,7 @@ use std::sync::Arc;
 /// Retrieve status information from the proxy server
 pub fn status(config: Config) -> Result<Value> {
     let mut url = config.url;
-    url.set_path("/_jumpwire/status");
+    url.set_path("/api/v1/status");
     let cookie_store = get_cookie_store()?;
     let request = client(&cookie_store)?.get(url);
     let resp = maybe_add_auth(request, config.token).send()?.json()?;
@@ -20,7 +20,7 @@ pub fn status(config: Config) -> Result<Value> {
 /// Issue a ping command expecting to get back a pong
 pub fn ping(config: Config) -> Result<String> {
     let mut url = config.url;
-    url.set_path("/_jumpwire/ping");
+    url.set_path("/ping");
     let cookie_store = get_cookie_store()?;
     let request = client(&cookie_store)?.get(url);
     let resp = maybe_add_auth(request, config.token).send()?.text()?;
@@ -42,7 +42,7 @@ pub fn config_get(config: Config) -> Result<()> {
 /// Check configured token permissions
 pub fn token_whoami(config: Config) -> Result<Value> {
     let mut url = config.url;
-    url.set_path("/_jumpwire/token");
+    url.set_path("/api/v1/token");
     let cookie_store = get_cookie_store()?;
     let request = client(&cookie_store)?.get(url);
     let resp = maybe_add_auth(request, config.token).send()?.json()?;
@@ -52,7 +52,7 @@ pub fn token_whoami(config: Config) -> Result<Value> {
 /// Generate a new token with specific permissions
 pub fn generate_token(config: Config, permissions: &[String]) -> Result<Value> {
     let mut url = config.url;
-    url.set_path("/_jumpwire/token");
+    url.set_path("/api/v1/token");
 
     let permissions: HashMap<&str, Vec<&str>> = permissions
         .iter()
@@ -130,7 +130,7 @@ pub fn sso_whoami(config: Config) -> Result<Value> {
 /// List all known databses of the given type
 pub fn list_dbs(config: Config, db_type: String) -> Result<HashMap<String, String>> {
     let mut url = config.url;
-    url.set_path(format!("/_jumpwire/manifests/{db_type}").as_str());
+    url.set_path(format!("/api/v1/manifests/{db_type}").as_str());
     let cookie_store = get_cookie_store()?;
 
     let request = client(&cookie_store)?.get(url);
@@ -146,7 +146,7 @@ pub fn list_dbs(config: Config, db_type: String) -> Result<HashMap<String, Strin
 /// databases that it can be authenticate to.
 pub fn check_db_token(config: &Config, token: &String) -> Result<HashMap<String, String>> {
     let mut url = config.url.clone();
-    url.set_path(format!("/_jumpwire/auth/{token}").as_str());
+    url.set_path(format!("/api/v1/auth/{token}").as_str());
     let cookie_store = get_cookie_store()?;
     let request = client(&cookie_store)?.get(url);
     let resp: HashMap<String, String> = maybe_add_auth(request, config.token.clone())
@@ -163,7 +163,7 @@ pub fn check_db_token(config: &Config, token: &String) -> Result<HashMap<String,
 /// logged in user.
 pub fn approve_db_authentication(config: &Config, token: &String, db_id: &String) -> Result<()> {
     let mut url = config.url.clone();
-    url.set_path(format!("/_jumpwire/auth/{token}").as_str());
+    url.set_path(format!("/api/v1/auth/{token}").as_str());
     let cookie_store = get_cookie_store()?;
 
     let mut body = HashMap::new();
