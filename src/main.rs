@@ -6,7 +6,7 @@ mod terminal;
 extern crate log;
 extern crate config as config_rs;
 
-use anyhow::Result;
+use anyhow::{Error, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 use log::{LevelFilter, SetLoggerError};
 use serde_json::to_string_pretty;
@@ -65,6 +65,12 @@ enum Commands {
     Db {
         #[command(subcommand)]
         command: DbCommands,
+    },
+
+    /// Client authentication used to connect to a proxied database
+    Client {
+        #[command(subcommand)]
+        command: ClientCommands,
     },
 }
 
@@ -125,6 +131,27 @@ enum DbCommands {
     Login {
         /// The token generated for the DB login
         token: String,
+    },
+}
+
+#[derive(Clone, Debug, Subcommand)]
+enum ClientCommands {
+    /// Get information about a client
+    #[command(arg_required_else_help = true)]
+    Get {
+        /// The ID of the client
+        id: String,
+    },
+
+    /// Generate a token to use for proxy authentication
+    #[command(arg_required_else_help = true)]
+    Token {
+        /// The ID of the client
+        id: String,
+
+        /// Print just the token without other log messages
+        #[arg(short, long)]
+        quiet: bool,
     },
 }
 
@@ -275,6 +302,33 @@ fn main() -> Result<()> {
                 debug!("Authenticating to database {:}", id);
                 command::approve_db_authentication(&config, token, id)?;
                 info!("Authentication request to {:} is approved!", name);
+            }
+        },
+        Commands::Client { command } => match command {
+            ClientCommands::Get { id } => {
+                let resp = command::client_get(config, id)?;
+                info!("Client information:\n{}", to_string_pretty(&resp)?);
+            }
+            ClientCommands::Token { id, quiet } => {
+                let resp = command::client_token(config, id)?;
+                let token = resp
+                    .get("token")
+                    .ok_or(Error::msg("Missing token in response"))?
+                    .as_str()
+                    .ok_or(Error::msg("Missing token in response"))?;
+                if *quiet {
+                    println!("{}", token);
+                } else {
+                    let manifest_id = resp
+                        .get("manifest_id")
+                        .ok_or(Error::msg("Missing manifest_id in response"))?
+                        .as_str()
+                        .ok_or(Error::msg("Missing manifest_id in response"))?;
+                    info!(
+                        "Token generated:\n\nusername: {}\npassword: {}",
+                        manifest_id, token
+                    );
+                }
             }
         },
     };

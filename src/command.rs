@@ -180,6 +180,38 @@ pub fn approve_db_authentication(config: &Config, token: &String, db_id: &String
     }
 }
 
+/// Retrieve information about a particular proxy client
+pub fn client_get(config: Config, id: &String) -> Result<HashMap<String, Value>> {
+    let mut url = config.url.clone();
+    url.set_path(format!("/api/v1/client/{id}").as_str());
+    let cookie_store = get_cookie_store()?;
+    let request = client(&cookie_store)?.get(url);
+    let resp: HashMap<String, Value> = maybe_add_auth(request, config.token.clone())
+        .send()?
+        .json()?;
+
+    match resp.get("error") {
+        None => Ok(resp),
+        Some(err) => Err(Error::msg(err.to_string())),
+    }
+}
+
+/// Generate an authentication token for a proxy client
+pub fn client_token(config: Config, id: &String) -> Result<HashMap<String, Value>> {
+    let mut url = config.url.clone();
+    url.set_path(format!("/api/v1/client/{id}/token").as_str());
+    let cookie_store = get_cookie_store()?;
+    let request = client(&cookie_store)?.put(url);
+    let resp: HashMap<String, Value> = maybe_add_auth(request, config.token.clone())
+        .send()?
+        .json()?;
+
+    match resp.get("error") {
+        None => Ok(resp),
+        Some(err) => Err(Error::msg(err.to_string())),
+    }
+}
+
 fn read_code() -> Result<String> {
     let mut guess = String::new();
 
