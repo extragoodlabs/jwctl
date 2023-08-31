@@ -1,10 +1,17 @@
-# jwctl
+<div align="center">
 
-[![jumpwire logo](./images/jumpwire-logo.png)](https://jumpwire.io)
+[![JumpWire](./images/jumpwire-logo.png)](https://jumpwire.io)
 
-![release workflow](https://github.com/extragoodlabs/jwctl/actions/workflows/shipit.yaml/badge.svg) [![release version](https://img.shields.io/github/v/release/extragoodlabs/jwctl?style=flat&label=version)](https://github.com/extragoodlabs/jwctl/releases/latest)
+#### jwctl - CLI for JumpWire
 
-This repo contains the CLI for interacting with a [JumpWire](https://jumpwire.io) proxy server.
+<!-- Badges - Start -->
+[![GitHub Release](https://img.shields.io/github/v/release/extragoodlabs/jwctl?style=flat-square&label=version)](https://github.com/extragoodlabs/jwctl/releases/latest)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/extragoodlabs/jwctl/shipit.yaml?style=flat-square&label=CI)
+<!-- Badges - End -->
+
+jwctl is a CLI for interacting with the [JumpWire](https://github.com/extragoodlabs/jumpwire) database gateway.
+
+</div>
 
 ## Installation
 
