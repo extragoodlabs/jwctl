@@ -57,10 +57,21 @@ All configuration options can be set using environment variables. Each variable 
 
 ### Configuration options
 
-| option | required? | description |
-| --- | --- | --- |
-| `url` | y | URL of the JumpWire proxy server |
-| `token` | n | Bearer token for authentication |
+| option | required? | description | examples |
+| --- | --- | --- | --- |
+| `url` | y | URL of the JumpWire gateway | jwctl -u <URL> <COMMAND>, JW_URL=<URL> jwctl <COMMAND> |
+| `token` | n | Bearer token for authentication | jwctl -t <TOKEN> <COMMAND>, JW_TOKEN=<TOKEN> jwctl <COMMAND> |
+
+### Configuration file
+
+The url of the JumpWire gateway can also be set via a yaml file. This file needs to be saved under the user home directory: `$HOME/.config/jwctl/config.yaml`
+
+```yaml
+# $HOME/.config/jwctl/config.yaml
+url: <URL>
+```
+
+To persist the auth token to a local file, see the section above describing [authentication](#authentication).
 
 ## Commands
 
