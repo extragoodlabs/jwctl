@@ -59,8 +59,8 @@ All configuration options can be set using environment variables. Each variable 
 
 | option | required? | description | examples |
 | --- | --- | --- | --- |
-| `url` | y | URL of the JumpWire gateway | jwctl -u <URL> <COMMAND>, JW_URL=<URL> jwctl <COMMAND> |
-| `token` | n | Bearer token for authentication | jwctl -t <TOKEN> <COMMAND>, JW_TOKEN=<TOKEN> jwctl <COMMAND> |
+| `url` | y | URL of the JumpWire gateway | `jwctl -u <URL> <COMMAND>`, `JW_URL=<URL> jwctl <COMMAND>` |
+| `token` | n | Bearer token for authentication | `jwctl -t <TOKEN> <COMMAND>`, `JW_TOKEN=<TOKEN> jwctl <COMMAND>` |
 
 ### Configuration file
 
