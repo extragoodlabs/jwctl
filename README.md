@@ -67,8 +67,7 @@ All configuration options can be set using environment variables. Each variable 
 The url of the JumpWire gateway can also be set via a yaml file. This file needs to be saved under the user home directory: `$HOME/.config/jwctl/config.yaml`
 
 ```yaml
-# ~/.config/jwctl/config.yaml
-url: <URL>
+url: http://localhost:4004
 ```
 
 To persist the auth token to a local file, see the section above describing [authentication](#authentication).
