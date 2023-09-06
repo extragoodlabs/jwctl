@@ -228,7 +228,14 @@ fn main() -> Result<()> {
     setup_logging(&args)?;
     debug!("Debug logging enabled");
 
-    let config = config::load_config(args.clone())?;
+    let config_file = config::config_file()?;
+    let config = config::load_config(args.clone()).map_err(|err| -> Error {
+        error!(
+            "Invalid configuration!\njwctl configuration can be read from:\n\t- {:?}\n\t- Environmenal variables prefixed with JW_, eg JW_URL\n\t- CLI flags",
+            config_file
+        );
+        err
+    })?;
 
     match &args.command {
         Commands::Config { command } => match command {

@@ -26,8 +26,7 @@ pub fn load_config(args: Args) -> Result<Config> {
     let dir_path = config_dir()?;
     debug!("Loading configuration from {:?}", dir_path);
 
-    let mut config_path = dir_path.clone();
-    config_path.push(CONFIG_FILE);
+    let config_path = config_file()?;
 
     // Create a config from the token file, if it exists, and
     // merge it into the main config.
@@ -47,6 +46,13 @@ pub fn load_config(args: Args) -> Result<Config> {
         .try_deserialize()?;
 
     Ok(config)
+}
+
+/// Return the path to the jwctl configuration file
+pub fn config_file() -> Result<PathBuf> {
+    let mut path = config_dir()?;
+    path.push(CONFIG_FILE);
+    Ok(path)
 }
 
 fn config_dir() -> Result<PathBuf> {
