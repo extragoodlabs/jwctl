@@ -95,7 +95,11 @@ pub fn auth_login(config: Config, idp: &str) -> Result<Value> {
     url.query_pairs_mut()
         .append_pair("target_url", &urlencoding::encode(target));
 
-    open::that(url.as_str())?;
+    match open::that(url.as_str()) {
+        Ok(()) => (),
+        Err(err) => debug!("Failed to open URL automatically: {:}", err),
+    };
+
     info!("The login URL will open automatically in your browser. If it does not, you can enter it directly:\n\n{:}\n\nAfter authenticating, enter the code displayed:", url.to_string());
 
     let code = read_code()?;
