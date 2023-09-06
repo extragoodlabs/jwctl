@@ -86,6 +86,7 @@ pub fn get_cookie_store() -> Result<Arc<CookieStoreMutex>> {
 /// Write reqwest cookies back to disk
 pub fn save_cookies(cookie_store: Arc<CookieStoreMutex>) -> Result<()> {
     let mut path = config_dir()?;
+    fs::create_dir_all(&path)?;
     path.push("cookies.json");
     debug!("Saving cookies to {:?}", path);
 
