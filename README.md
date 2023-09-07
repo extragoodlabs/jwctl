@@ -125,3 +125,15 @@ List all databases of a given type. Currently supported types are `postgresql` a
 Approve an authentication attempt to a proxied database. The token is generated automatically when connecting a database client to the JumpWire enginer without explicitly setting a password.
 
 If the passed token is valid, jwctl will display a prompt to select which upstream database the proxy should connect to.
+
+### `client token <id>`
+
+Generate a token for the specified client ID. The returned token is used when connecting a database client to JumpWire.
+
+#### Formats
+
+Different output formats can be specified with the `--format` flag. By default, YAML formatting is used.
+
+- `yaml` - all connection information is formatted as a YAML map.
+- `raw` - only the token is printed,
+- `url` - format as a connection string. This can usually be passed directly to a database client, such as psql.
