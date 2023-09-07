@@ -4,6 +4,7 @@ use crate::config::{get_cookie_store, save_cookies, Config};
 use anyhow::{Error, Result};
 use itertools::Itertools;
 use reqwest::blocking::RequestBuilder;
+use serde::Deserialize;
 use serde_json::Value;
 use std::sync::Arc;
 
@@ -201,19 +202,43 @@ pub fn client_get(config: Config, id: &String) -> Result<HashMap<String, Value>>
 }
 
 /// Generate an authentication token for a proxy client
-pub fn client_token(config: Config, id: &String) -> Result<HashMap<String, Value>> {
+pub fn client_token(config: &Config, id: &String) -> Result<ClientTokenData> {
     let mut url = config.url.clone();
     url.set_path(format!("/api/v1/client/{id}/token").as_str());
     let cookie_store = get_cookie_store()?;
     let request = client(&cookie_store)?.put(url);
-    let resp: HashMap<String, Value> = maybe_add_auth(request, config.token.clone())
+    let resp: ClientTokenResponse = maybe_add_auth(request, config.token.clone())
         .send()?
         .json()?;
 
-    match resp.get("error") {
-        None => Ok(resp),
-        Some(err) => Err(Error::msg(err.to_string())),
+    match resp {
+        ClientTokenResponse::Error(ApiError { error }) => Err(Error::msg(error.to_string())),
+        ClientTokenResponse::Ok(data) => Ok(data),
     }
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum ClientTokenResponse {
+    Error(ApiError),
+    Ok(ClientTokenData),
+}
+
+#[derive(Deserialize)]
+pub struct ApiError {
+    pub error: String,
+}
+
+#[derive(Deserialize)]
+pub struct ClientTokenData {
+    pub id: String,
+    pub token: String,
+    pub manifest_id: String,
+    pub protocol: String,
+    pub port: u32,
+
+    #[serde(default)]
+    pub database: Option<String>,
 }
 
 fn read_code() -> Result<String> {

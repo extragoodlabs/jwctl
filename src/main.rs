@@ -11,6 +11,7 @@ use clap::{Parser, Subcommand, ValueEnum};
 use log::{LevelFilter, SetLoggerError};
 use serde_json::to_string_pretty;
 use simplelog::TermLogger;
+use strum_macros::Display;
 
 #[derive(Clone, Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -152,19 +153,26 @@ enum ClientCommands {
         /// Print just the token without other log messages
         #[arg(short, long)]
         quiet: bool,
+
+        /// How to format the output
+        #[arg(short, long, default_value_t = OutputFormat::Yaml)]
+        format: OutputFormat,
     },
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, ValueEnum)]
+#[derive(Clone, Debug, Display, PartialEq, Eq, ValueEnum)]
+#[strum(serialize_all = "snake_case")]
 enum DatabaseType {
     Postgresql,
     Mysql,
 }
 
-impl std::fmt::Display for DatabaseType {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        std::fmt::Debug::fmt(self, f)
-    }
+#[derive(Clone, Debug, Display, PartialEq, Eq, ValueEnum)]
+#[strum(serialize_all = "snake_case")]
+enum OutputFormat {
+    Yaml,
+    Url,
+    Raw,
 }
 
 impl config_rs::Source for Args {
@@ -316,25 +324,27 @@ fn main() -> Result<()> {
                 let resp = command::client_get(config, id)?;
                 info!("Client information:\n{}", to_string_pretty(&resp)?);
             }
-            ClientCommands::Token { id, quiet } => {
-                let resp = command::client_token(config, id)?;
-                let token = resp
-                    .get("token")
-                    .ok_or(Error::msg("Missing token in response"))?
-                    .as_str()
-                    .ok_or(Error::msg("Missing token in response"))?;
-                if *quiet {
-                    println!("{}", token);
-                } else {
-                    let manifest_id = resp
-                        .get("manifest_id")
-                        .ok_or(Error::msg("Missing manifest_id in response"))?
-                        .as_str()
-                        .ok_or(Error::msg("Missing manifest_id in response"))?;
-                    info!(
-                        "Token generated:\n\nusername: {}\npassword: {}",
-                        manifest_id, token
-                    );
+            ClientCommands::Token { id, quiet, format } => {
+                let data = command::client_token(&config, id)?;
+                if !*quiet {
+                    info!("Token generated\n");
+                }
+                let host = &config
+                    .url
+                    .host_str()
+                    .ok_or(Error::msg("Missing host in URL"))?;
+                let database = data.database.unwrap_or("".to_string());
+
+                match format {
+                    OutputFormat::Raw => println!("{}", data.token),
+                    OutputFormat::Yaml => println!(
+                        "type: {}\nhost: {}\nport: {}\nusername: {}\npassword: {}",
+                        data.protocol, host, data.port, data.manifest_id, data.token
+                    ),
+                    OutputFormat::Url => println!(
+                        "{}://{}:{}@{}:{}/{}",
+                        data.protocol, data.manifest_id, data.token, host, data.port, database
+                    ),
                 }
             }
         },
