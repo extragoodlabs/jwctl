@@ -362,7 +362,9 @@ fn main() -> Result<()> {
                 manifests::ManifestCommands::Get { id } => {
                     manifests::get_by_id(config, id.to_string())?
                 }
-                manifests::ManifestCommands::Delete { id: _ } => todo!(),
+                manifests::ManifestCommands::Delete { id } => {
+                    manifests::delete(config, id.to_string())?
+                }
                 manifests::ManifestCommands::Create => manifests::create(config)?,
             };
 

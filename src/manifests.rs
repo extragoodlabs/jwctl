@@ -3,7 +3,6 @@ use crate::http::{client, maybe_add_auth};
 
 use anyhow::Result;
 use base64::engine::general_purpose;
-// use reqwest::blocking::RequestBuilder;
 use serde_json::Value;
 
 use clap::Subcommand;
@@ -59,6 +58,19 @@ pub fn get_by_id(config: Config, id: String) -> Result<Value> {
 
     let cookie_store = get_cookie_store()?;
     let request = client(&cookie_store)?.get(url);
+
+    let resp = maybe_add_auth(request, config.token).send()?.json()?;
+    Ok(resp)
+}
+
+pub fn delete(config: Config, id: String) -> Result<Value> {
+    let full_url = format!("{}/{}", MANIFEST_API, id);
+
+    let mut url = config.url;
+    url.set_path(full_url.as_str());
+
+    let cookie_store = get_cookie_store()?;
+    let request = client(&cookie_store)?.delete(url);
 
     let resp = maybe_add_auth(request, config.token).send()?.json()?;
     Ok(resp)
