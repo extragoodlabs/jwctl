@@ -224,7 +224,7 @@ pub fn create(config: Config) -> Result<Value> {
 
         let resp = maybe_add_auth(request, config.token).send()?.json()?;
 
-        return Ok(resp);
+        Ok(resp)
     })
 }
 
@@ -526,7 +526,7 @@ fn prompt_user_for_manifest() -> Result<NewManifest> {
     let name = CustomType::<String>::new("What is the name of your manifest?")
         .with_parser(&|input| {
             if input.is_empty() {
-                return Err(());
+                Err(())
             } else {
                 let is_valid = input
                     .chars()
