@@ -16,15 +16,22 @@ strip = true
 
 [dependencies]
 anyhow = "1.0.72"
+base64 = "0.21.5"
 clap = { version = "4.3.19", features = ["derive"] }
 config = "0.13.3"
 crossterm = "0.27.0"
 home = "0.5.5"
+inquire = { version = "0.6.2", features = ["editor"] }
 itertools = "0.11.0"
 log = "0.4.19"
 open = "5.0.0"
 ratatui = { version = "0.22.0", features = ["serde"] }
-reqwest = { version = "0.11.18", features = ["blocking", "json", "rustls-tls-native-roots", "cookies"], default-features = false }
+reqwest = { version = "0.11.18", features = [
+  "blocking",
+  "json",
+  "rustls-tls-native-roots",
+  "cookies",
+], default-features = false }
 reqwest_cookie_store = "0.6.0"
 serde = { version = "1.0.179", features = ["serde_derive"] }
 serde_json = "1.0.104"

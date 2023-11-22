@@ -1,5 +1,7 @@
 mod command;
 mod config;
+mod http;
+mod manifests;
 mod terminal;
 
 #[macro_use]
@@ -72,6 +74,12 @@ enum Commands {
     Client {
         #[command(subcommand)]
         command: ClientCommands,
+    },
+
+    /// Perform actions on manifests
+    Manifest {
+        #[command(subcommand)]
+        command: manifests::ManifestCommands,
     },
 }
 
@@ -348,6 +356,18 @@ fn main() -> Result<()> {
                 }
             }
         },
+        Commands::Manifest { command } => {
+            let resp = match command {
+                manifests::ManifestCommands::All => manifests::all(config)?,
+                manifests::ManifestCommands::Get { id } => {
+                    manifests::get_by_id(config, id.to_string())?
+                }
+                manifests::ManifestCommands::Delete { id: _ } => todo!(),
+                manifests::ManifestCommands::Create => manifests::create(config)?,
+            };
+
+            info!("Manifests:\n{}", to_string_pretty(&resp)?);
+        }
     };
 
     Ok(())
