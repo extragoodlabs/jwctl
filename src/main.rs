@@ -2,6 +2,7 @@ mod command;
 mod config;
 mod http;
 mod manifests;
+mod proxy_schemas;
 mod terminal;
 
 #[macro_use]

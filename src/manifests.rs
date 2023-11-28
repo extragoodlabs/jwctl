@@ -11,7 +11,7 @@ use inquire::{
 use serde::{Deserialize, Serialize};
 
 // constant for the manifest API
-const MANIFEST_API: &str = "/api/v1/manifests";
+pub const MANIFEST_API: &str = "/api/v1/manifests";
 
 // Enum for root_type which can be extended as needed
 #[derive(Serialize, Deserialize, Debug)]
