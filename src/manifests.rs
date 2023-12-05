@@ -299,10 +299,7 @@ fn prompt_for_postgresql_credentials() -> PostgresqlCredentials {
         .prompt()
         .unwrap();
 
-    PostgresqlCredentials {
-        username: username,
-        password: password,
-    }
+    PostgresqlCredentials { username, password }
 }
 
 // Prompt for MySQL credentials
@@ -317,10 +314,7 @@ fn prompt_for_mysql_credentials() -> MysqlCredentials {
         .prompt()
         .unwrap();
 
-    MysqlCredentials {
-        username: username,
-        password: password,
-    }
+    MysqlCredentials { username, password }
 }
 
 fn prompt_user_for_manifest() -> Result<NewManifest> {
