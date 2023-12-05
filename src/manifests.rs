@@ -4,7 +4,10 @@ use crate::http::{client, maybe_add_auth};
 use anyhow::Result;
 use serde_json::Value;
 
-use inquire::{Confirm, CustomType, InquireError, Password, PasswordDisplayMode, Select, Text};
+use inquire::{
+    validator::Validation, Confirm, CustomType, CustomUserError, InquireError, Password,
+    PasswordDisplayMode, Select, Text,
+};
 use serde::{Deserialize, Serialize};
 
 // constant for the manifest API
@@ -157,6 +160,14 @@ pub fn create(config: Config) -> Result<Value> {
 
 // ------------------ Prompt Functions ------------------ //
 
+fn not_empty_validator(input: &str) -> Result<Validation, CustomUserError> {
+    if input.trim().is_empty() {
+        Ok(Validation::Invalid("The input cannot be empty.".into()))
+    } else {
+        Ok(Validation::Valid)
+    }
+}
+
 fn prompt_for_root_type() -> RootType {
     let options: Vec<&str> = vec!["PostgreSQL", "MySQL"];
 
@@ -184,10 +195,12 @@ fn prompt_for_vault() -> bool {
 // PostgreSQL configuration prompt function
 fn prompt_for_postgresql_config() -> PostgresqlConfig {
     let hostname = Text::new("What is your PostgreSQL hostname?")
+        .with_validator(not_empty_validator)
         .prompt()
         .unwrap();
 
     let database = Text::new("What is your PostgreSQL database name?")
+        .with_validator(not_empty_validator)
         .prompt()
         .unwrap();
 
@@ -229,9 +242,13 @@ fn prompt_for_postgresql_config() -> PostgresqlConfig {
 
 // MySQL configuration prompt function
 fn prompt_for_mysql_config() -> MysqlConfig {
-    let hostname = Text::new("What is your MySQL hostname?").prompt().unwrap();
+    let hostname = Text::new("What is your MySQL hostname?")
+        .with_validator(not_empty_validator)
+        .prompt()
+        .unwrap();
 
     let database = Text::new("What is your MySQL database name?")
+        .with_validator(not_empty_validator)
         .prompt()
         .unwrap();
 
@@ -257,10 +274,12 @@ fn prompt_for_mysql_config() -> MysqlConfig {
 
 fn prompt_for_vault_credentials() -> VaultCredentials {
     let database = Text::new("What Vault database are you using?")
+        .with_validator(not_empty_validator)
         .prompt()
         .unwrap();
 
     let role = Text::new("What Vault role are you using?")
+        .with_validator(not_empty_validator)
         .prompt()
         .unwrap();
 
@@ -270,11 +289,13 @@ fn prompt_for_vault_credentials() -> VaultCredentials {
 // Prompt for PostgreSQL credentials
 fn prompt_for_postgresql_credentials() -> PostgresqlCredentials {
     let username = Text::new("What is your PostgreSQL username?")
+        .with_validator(not_empty_validator)
         .prompt()
         .unwrap();
 
     let password = Password::new("What is your PostgreSQL password?")
         .with_display_mode(PasswordDisplayMode::Masked)
+        .with_validator(not_empty_validator)
         .prompt()
         .unwrap();
 
@@ -286,9 +307,15 @@ fn prompt_for_postgresql_credentials() -> PostgresqlCredentials {
 
 // Prompt for MySQL credentials
 fn prompt_for_mysql_credentials() -> MysqlCredentials {
-    let username = Text::new("What is your MySQL username?").prompt().unwrap();
+    let username = Text::new("What is your MySQL username?")
+        .with_validator(not_empty_validator)
+        .prompt()
+        .unwrap();
 
-    let password = Text::new("What is your MySQL password?").prompt().unwrap();
+    let password = Text::new("What is your MySQL password?")
+        .with_validator(not_empty_validator)
+        .prompt()
+        .unwrap();
 
     MysqlCredentials {
         username: username,
