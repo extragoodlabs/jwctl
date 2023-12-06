@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
 use crate::config::{get_cookie_store, save_cookies, Config};
+use crate::http::{client, maybe_add_auth};
 use anyhow::{Error, Result};
 use itertools::Itertools;
-use reqwest::blocking::RequestBuilder;
+
 use serde::Deserialize;
 use serde_json::Value;
-use std::sync::Arc;
 
 /// Retrieve status information from the proxy server
 pub fn status(config: Config) -> Result<Value> {
@@ -249,21 +249,4 @@ fn read_code() -> Result<String> {
         .map_err(|_| Error::msg("Failed to read line"))?;
 
     Ok(guess.trim().to_string())
-}
-
-fn client(
-    cookie_store: &Arc<reqwest_cookie_store::CookieStoreMutex>,
-) -> Result<reqwest::blocking::Client> {
-    let client = reqwest::blocking::ClientBuilder::new()
-        .cookie_store(true)
-        .cookie_provider(Arc::clone(cookie_store))
-        .build()?;
-    Ok(client)
-}
-
-fn maybe_add_auth(request: RequestBuilder, token: Option<String>) -> RequestBuilder {
-    match token {
-        Some(token) => request.bearer_auth(token),
-        None => request,
-    }
 }

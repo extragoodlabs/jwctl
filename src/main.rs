@@ -1,5 +1,7 @@
 mod command;
 mod config;
+mod http;
+mod manifests;
 mod terminal;
 
 #[macro_use]
@@ -72,6 +74,12 @@ enum Commands {
     Client {
         #[command(subcommand)]
         command: ClientCommands,
+    },
+
+    /// Perform actions on manifests
+    Manifest {
+        #[command(subcommand)]
+        command: ManifestCommands,
     },
 }
 
@@ -173,6 +181,29 @@ enum OutputFormat {
     Yaml,
     Url,
     Raw,
+}
+
+#[derive(Clone, Debug, Subcommand)]
+pub enum ManifestCommands {
+    /// Get all manifests
+    List,
+
+    /// Get information about a manifest
+    #[command(arg_required_else_help = true)]
+    Get {
+        /// The ID of the manifest
+        id: String,
+    },
+
+    /// Delete a manifest
+    #[command(arg_required_else_help = true)]
+    Delete {
+        /// The ID of the manifest
+        id: String,
+    },
+
+    /// Create a manifest
+    Create,
 }
 
 impl config_rs::Source for Args {
@@ -348,6 +379,16 @@ fn main() -> Result<()> {
                 }
             }
         },
+        Commands::Manifest { command } => {
+            let restult = match command {
+                ManifestCommands::List => manifests::list(config)?,
+                ManifestCommands::Get { id } => manifests::get_by_id(config, id.to_string())?,
+                ManifestCommands::Delete { id } => manifests::delete(config, id.to_string())?,
+                ManifestCommands::Create => manifests::create(config)?,
+            };
+
+            println!("{}", to_string_pretty(&restult)?);
+        }
     };
 
     Ok(())
