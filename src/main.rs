@@ -380,12 +380,14 @@ fn main() -> Result<()> {
             }
         },
         Commands::Manifest { command } => {
-            match command {
+            let restult = match command {
                 ManifestCommands::List => manifests::list(config)?,
                 ManifestCommands::Get { id } => manifests::get_by_id(config, id.to_string())?,
                 ManifestCommands::Delete { id } => manifests::delete(config, id.to_string())?,
                 ManifestCommands::Create => manifests::create(config)?,
             };
+
+            println!("{}", to_string_pretty(&restult)?);
         }
     };
 
