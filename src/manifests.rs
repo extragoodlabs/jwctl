@@ -103,14 +103,16 @@ pub struct NewManifest {
 
 // ------------------ CLI Functions ------------------ //
 
-pub fn list(config: Config) -> Result<Value> {
-    let mut url = config.url;
+pub fn list(config: &Config) -> Result<Value> {
+    let mut url = config.url.clone();
     url.set_path(MANIFEST_API);
 
     let cookie_store = get_cookie_store()?;
     let request = client(&cookie_store)?.get(url);
 
-    let resp = maybe_add_auth(request, config.token).send()?.json()?;
+    let resp = maybe_add_auth(request, config.token.clone())
+        .send()?
+        .json()?;
     Ok(resp)
 }
 

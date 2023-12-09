@@ -82,6 +82,12 @@ enum Commands {
         #[command(subcommand)]
         command: ManifestCommands,
     },
+
+    /// Perform actions on proxy schemas
+    ProxySchema {
+        #[command(subcommand)]
+        command: ProxySchemaCommands,
+    },
 }
 
 #[derive(Clone, Debug, Subcommand)]
@@ -204,6 +210,29 @@ pub enum ManifestCommands {
     },
 
     /// Create a manifest
+    Create,
+}
+
+#[derive(Clone, Debug, Subcommand)]
+pub enum ProxySchemaCommands {
+    /// Get all proxy schemas
+    List,
+
+    /// Get information about a proxy schemas
+    #[command(arg_required_else_help = true)]
+    Get {
+        /// The ID of the proxy schemas
+        id: String,
+    },
+
+    /// Delete a proxy schemas
+    #[command(arg_required_else_help = true)]
+    Delete {
+        /// The ID of the proxy schemas
+        id: String,
+    },
+
+    /// Create a proxy schemas
     Create,
 }
 
@@ -382,13 +411,29 @@ fn main() -> Result<()> {
         },
         Commands::Manifest { command } => {
             let restult = match command {
-                ManifestCommands::List => manifests::list(config)?,
+                ManifestCommands::List => manifests::list(&config)?,
                 ManifestCommands::Get { id } => manifests::get_by_id(config, id.to_string())?,
                 ManifestCommands::Delete { id } => manifests::delete(config, id.to_string())?,
                 ManifestCommands::Create => manifests::create(config)?,
             };
 
-            println!("{}", to_string_pretty(&restult)?);
+            info!("{}", to_string_pretty(&restult)?);
+        }
+        Commands::ProxySchema { command } => {
+            let restult = match command {
+                ProxySchemaCommands::List => proxy_schemas::list(&config)?,
+                ProxySchemaCommands::Get { id } => {
+                    todo!()
+                    // proxy_schemas::get_by_id(config, id.to_string())?
+                }
+                ProxySchemaCommands::Delete { id } => {
+                    todo!()
+                    // proxy_schemas::delete(config, id.to_string())?
+                }
+                ProxySchemaCommands::Create => proxy_schemas::create(config)?,
+            };
+
+            info!("{}", to_string_pretty(&restult)?);
         }
     };
 
