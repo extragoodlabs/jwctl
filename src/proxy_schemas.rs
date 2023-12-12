@@ -99,7 +99,7 @@ pub fn create(config: Config) -> Result<Value> {
 // ------------------ Prompt Functions ------------------ //
 
 fn select_manifest(config: &Config) -> Result<String> {
-    let manifests = get_list_manifests(&config)?;
+    let manifests = get_list_manifests(config)?;
 
     let mut keys = HashMap::new();
 
@@ -196,8 +196,7 @@ fn get_list_manifests(config: &Config) -> Result<Vec<HashMap<String, String>>> {
         Err(e) => return Err(e),
     };
 
-    let names = list
-        .into_iter()
+    list.into_iter()
         .map(|m| {
             let obj = m
                 .as_object()
@@ -222,7 +221,5 @@ fn get_list_manifests(config: &Config) -> Result<Vec<HashMap<String, String>>> {
 
             Ok(map)
         })
-        .collect();
-
-    names
+        .collect()
 }
