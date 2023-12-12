@@ -423,12 +423,10 @@ fn main() -> Result<()> {
             let restult = match command {
                 ProxySchemaCommands::List => proxy_schemas::list(&config)?,
                 ProxySchemaCommands::Get { id } => {
-                    todo!()
-                    // proxy_schemas::get_by_id(config, id.to_string())?
+                    proxy_schemas::get_by_id(config, id.to_string())?
                 }
                 ProxySchemaCommands::Delete { id } => {
-                    todo!()
-                    // proxy_schemas::delete(config, id.to_string())?
+                    proxy_schemas::delete(config, id.to_string())?
                 }
                 ProxySchemaCommands::Create => proxy_schemas::create(config)?,
             };

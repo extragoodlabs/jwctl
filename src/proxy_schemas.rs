@@ -32,40 +32,44 @@ pub fn list(config: &Config) -> Result<Value> {
     let manifest_id = select_manifest(config)?;
 
     let url = create_url(config, manifest_id);
+
     let cookie_store = get_cookie_store()?;
     let request = client(&cookie_store)?.get(url);
 
     let resp = maybe_add_auth(request, config.token.clone())
         .send()?
         .json()?;
+
     Ok(resp)
 }
 
-// pub fn get_by_id(config: Config, id: String) -> Result<Value> {
-//     let full_url = format!("{}/{}", MANIFEST_API, id);
+pub fn get_by_id(config: Config, id: String) -> Result<Value> {
+    let manifest_id = select_manifest(&config)?;
+    let mid = manifest_id.clone();
 
-//     let mut url = config.url;
-//     url.set_path(full_url.as_str());
+    let url = create_url(&config, mid);
+    let full_url = format!("{}/{}", url, id);
 
-//     let cookie_store = get_cookie_store()?;
-//     let request = client(&cookie_store)?.get(url);
+    let cookie_store = get_cookie_store()?;
+    let request = client(&cookie_store)?.get(full_url);
 
-//     let resp = maybe_add_auth(request, config.token).send()?.json()?;
-//     Ok(resp)
-// }
+    let resp = maybe_add_auth(request, config.token).send()?.json()?;
+    Ok(resp)
+}
 
-// pub fn delete(config: Config, id: String) -> Result<Value> {
-//     let full_url = format!("{}/{}", MANIFEST_API, id);
+pub fn delete(config: Config, id: String) -> Result<Value> {
+    let manifest_id = select_manifest(&config)?;
+    let mid = manifest_id.clone();
 
-//     let mut url = config.url;
-//     url.set_path(full_url.as_str());
+    let url = create_url(&config, mid);
+    let full_url = format!("{}/{}", url, id);
 
-//     let cookie_store = get_cookie_store()?;
-//     let request = client(&cookie_store)?.delete(url);
+    let cookie_store = get_cookie_store()?;
+    let request = client(&cookie_store)?.delete(full_url);
 
-//     let resp = maybe_add_auth(request, config.token).send()?.json()?;
-//     Ok(resp)
-// }
+    let resp = maybe_add_auth(request, config.token).send()?.json()?;
+    Ok(resp)
+}
 
 pub fn create(config: Config) -> Result<Value> {
     let manifest_id = select_manifest(&config)?;
