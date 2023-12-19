@@ -2,7 +2,7 @@ mod command;
 mod config;
 mod http;
 mod manifests;
-mod proxy_schemas;
+mod schemas;
 mod terminal;
 
 #[macro_use]
@@ -84,9 +84,9 @@ enum Commands {
     },
 
     /// Perform actions on proxy schemas
-    ProxySchema {
+    Schema {
         #[command(subcommand)]
-        command: ProxySchemaCommands,
+        command: SchemaCommands,
     },
 }
 
@@ -214,25 +214,35 @@ pub enum ManifestCommands {
 }
 
 #[derive(Clone, Debug, Subcommand)]
-pub enum ProxySchemaCommands {
-    /// Get all proxy schemas
-    List,
+pub enum SchemaCommands {
+    /// List schemas for a manifest
+    #[command(arg_required_else_help = true)]
+    List {
+        /// The ID of the manifest
+        id: Option<String>,
+    },
 
-    /// Get information about a proxy schemas
+    /// Get information about a specific schema
     #[command(arg_required_else_help = true)]
     Get {
-        /// The ID of the proxy schemas
+        /// The ID of the manifest
+        manifest_id: String,
+
+        /// The ID of the schema to get
         id: String,
     },
 
-    /// Delete a proxy schemas
+    /// Delete a schema
     #[command(arg_required_else_help = true)]
     Delete {
-        /// The ID of the proxy schemas
+        /// The ID of the manifest
+        manifest_id: String,
+
+        /// The ID of the schema to delete
         id: String,
     },
 
-    /// Create a proxy schemas
+    /// Create a schema
     Create,
 }
 
@@ -419,19 +429,19 @@ fn main() -> Result<()> {
 
             info!("{}", to_string_pretty(&restult)?);
         }
-        Commands::ProxySchema { command } => {
-            let restult = match command {
-                ProxySchemaCommands::List => proxy_schemas::list(&config)?,
-                ProxySchemaCommands::Get { id } => {
-                    proxy_schemas::get_by_id(config, id.to_string())?
+        Commands::Schema { command } => {
+            let result = match command {
+                SchemaCommands::List { id } => schemas::list(id.clone(), &config)?,
+                SchemaCommands::Get { manifest_id, id } => {
+                    schemas::get_by_id(manifest_id.to_string(), id.to_string(), config)?
                 }
-                ProxySchemaCommands::Delete { id } => {
-                    proxy_schemas::delete(config, id.to_string())?
+                SchemaCommands::Delete { manifest_id, id } => {
+                    schemas::delete(manifest_id.to_string(), id.to_string(), config)?
                 }
-                ProxySchemaCommands::Create => proxy_schemas::create(config)?,
+                SchemaCommands::Create => schemas::create(config)?,
             };
 
-            info!("{}", to_string_pretty(&restult)?);
+            info!("{}", to_string_pretty(&result)?);
         }
     };
 

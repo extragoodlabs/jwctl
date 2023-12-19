@@ -28,10 +28,13 @@ pub struct ProxySchema {
 
 // -------------------- CLI Functions ------------------- //
 
-pub fn list(config: &Config) -> Result<Value> {
-    let manifest_id = select_manifest(config)?;
+pub fn list(manifest_id: Option<String>, config: &Config) -> Result<Value> {
+    let final_manifest_id = match manifest_id {
+        Some(id) => Ok(id),
+        None => select_manifest(config),
+    }?;
 
-    let url = create_url(config, manifest_id);
+    let url = create_url(config, final_manifest_id);
 
     let cookie_store = get_cookie_store()?;
     let request = client(&cookie_store)?.get(url);
@@ -43,11 +46,8 @@ pub fn list(config: &Config) -> Result<Value> {
     Ok(resp)
 }
 
-pub fn get_by_id(config: Config, id: String) -> Result<Value> {
-    let manifest_id = select_manifest(&config)?;
-    let mid = manifest_id.clone();
-
-    let url = create_url(&config, mid);
+pub fn get_by_id(manifest_id: String, id: String, config: Config) -> Result<Value> {
+    let url = create_url(&config, manifest_id);
     let full_url = format!("{}/{}", url, id);
 
     let cookie_store = get_cookie_store()?;
@@ -57,11 +57,8 @@ pub fn get_by_id(config: Config, id: String) -> Result<Value> {
     Ok(resp)
 }
 
-pub fn delete(config: Config, id: String) -> Result<Value> {
-    let manifest_id = select_manifest(&config)?;
-    let mid = manifest_id.clone();
-
-    let url = create_url(&config, mid);
+pub fn delete(manifest_id: String, id: String, config: Config) -> Result<Value> {
+    let url = create_url(&config, manifest_id);
     let full_url = format!("{}/{}", url, id);
 
     let cookie_store = get_cookie_store()?;
