@@ -2,6 +2,7 @@ mod command;
 mod config;
 mod http;
 mod manifests;
+mod schemas;
 mod terminal;
 
 #[macro_use]
@@ -80,6 +81,12 @@ enum Commands {
     Manifest {
         #[command(subcommand)]
         command: ManifestCommands,
+    },
+
+    /// Perform actions on proxy schemas
+    Schema {
+        #[command(subcommand)]
+        command: SchemaCommands,
     },
 }
 
@@ -203,6 +210,39 @@ pub enum ManifestCommands {
     },
 
     /// Create a manifest
+    Create,
+}
+
+#[derive(Clone, Debug, Subcommand)]
+pub enum SchemaCommands {
+    /// List schemas for a manifest
+    #[command(arg_required_else_help = true)]
+    List {
+        /// The ID of the manifest
+        id: Option<String>,
+    },
+
+    /// Get information about a specific schema
+    #[command(arg_required_else_help = true)]
+    Get {
+        /// The ID of the manifest
+        manifest_id: String,
+
+        /// The ID of the schema to get
+        id: String,
+    },
+
+    /// Delete a schema
+    #[command(arg_required_else_help = true)]
+    Delete {
+        /// The ID of the manifest
+        manifest_id: String,
+
+        /// The ID of the schema to delete
+        id: String,
+    },
+
+    /// Create a schema
     Create,
 }
 
@@ -381,13 +421,27 @@ fn main() -> Result<()> {
         },
         Commands::Manifest { command } => {
             let restult = match command {
-                ManifestCommands::List => manifests::list(config)?,
+                ManifestCommands::List => manifests::list(&config)?,
                 ManifestCommands::Get { id } => manifests::get_by_id(config, id.to_string())?,
                 ManifestCommands::Delete { id } => manifests::delete(config, id.to_string())?,
                 ManifestCommands::Create => manifests::create(config)?,
             };
 
-            println!("{}", to_string_pretty(&restult)?);
+            info!("{}", to_string_pretty(&restult)?);
+        }
+        Commands::Schema { command } => {
+            let result = match command {
+                SchemaCommands::List { id } => schemas::list(id.clone(), &config)?,
+                SchemaCommands::Get { manifest_id, id } => {
+                    schemas::get_by_id(manifest_id.to_string(), id.to_string(), config)?
+                }
+                SchemaCommands::Delete { manifest_id, id } => {
+                    schemas::delete(manifest_id.to_string(), id.to_string(), config)?
+                }
+                SchemaCommands::Create => schemas::create(config)?,
+            };
+
+            info!("{}", to_string_pretty(&result)?);
         }
     };
 
